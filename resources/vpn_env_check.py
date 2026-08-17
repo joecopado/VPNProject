@@ -1,3 +1,4 @@
+import getpass
 import json
 import os
 import platform
@@ -12,13 +13,18 @@ def get_working_directory():
 
 
 def check_identity():
+    sudo_path = shutil.which("sudo")
+    sudo_noninteractive_ok = False
+    if sudo_path:
+        sudo_noninteractive_ok = subprocess.run(
+            [sudo_path, "-n", "true"], capture_output=True
+        ).returncode == 0
     return {
         "euid": os.geteuid() if hasattr(os, "geteuid") else None,
         "is_root": hasattr(os, "geteuid") and os.geteuid() == 0,
-        "whoami": subprocess.run(["whoami"], capture_output=True, text=True).stdout.strip(),
-        "sudo_noninteractive_ok": subprocess.run(
-            ["sudo", "-n", "true"], capture_output=True
-        ).returncode == 0,
+        "whoami": getpass.getuser(),
+        "sudo_present": sudo_path is not None,
+        "sudo_noninteractive_ok": sudo_noninteractive_ok,
     }
 
 
