@@ -20,6 +20,7 @@ ${username}                     pace.delivery1@qentinel.com.demonew
 ${login_url}                    https://qentinel--demonew.my.salesforce.com/            # Salesforce instance. NOTE: Should be overwritten in CRT variables
 ${home_url}                     ${login_url}/lightning/page/home
 ${DOWNLOAD_DIR}    ${CURDIR}
+${PROXY_SERVER}                 ${EMPTY}            # e.g. socks5://<gateway_host>:<port>. Overwrite in CRT variables when routing through a VPN gateway; leave empty otherwise.
 
 
 *** Keywords ***
@@ -27,9 +28,12 @@ Setup Browser
     # Setting search order is not really needed here, but given as an example
     # if you need to use multiple libraries containing keywords with duplicate names
     Set Library Search Order    QForce                      QWeb
- 
-    
-    Open Browser                about:blank                 ${BROWSER}    
+
+    IF    "${PROXY_SERVER}" != "${EMPTY}"
+        Open Browser             about:blank                 ${BROWSER}    options=--proxy-server=${PROXY_SERVER}
+    ELSE
+        Open Browser             about:blank                 ${BROWSER}
+    END
     SetConfig                   LineBreak                   ${EMPTY}
     Evaluate                    random.seed()               random
     SetConfig                   DefaultTimeout              20s
