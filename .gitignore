@@ -1,0 +1,5 @@
+.env
+*.ovpn
+*credentials*
+__pycache__/
+*.pyc
