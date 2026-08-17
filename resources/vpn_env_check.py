@@ -94,20 +94,31 @@ def check_egress(host, ports):
     return results
 
 
+PROBE_VERSION = "2026-08-17c"
+
+
+def _safe(fn, *args):
+    try:
+        return fn(*args)
+    except Exception as e:
+        return {"error": f"{e.__class__.__name__}: {e}"}
+
+
 def run_full_env_check():
     report = {
+        "probe_version": PROBE_VERSION,
         "cwd": get_working_directory(),
         "python_executable": sys.executable,
         "python_version": sys.version,
         "platform": platform.platform(),
-        "identity": check_identity(),
-        "tun_device": check_tun_device(),
-        "init_system": check_init_system(),
-        "dbus": check_dbus(),
-        "package_managers": check_package_managers(),
-        "vpn_tooling": check_vpn_tooling(),
-        "egress_easyvpn_openvpn_com": check_egress(
-            "easyvpn.openvpn.com", [443, 943, 1194]
+        "identity": _safe(check_identity),
+        "tun_device": _safe(check_tun_device),
+        "init_system": _safe(check_init_system),
+        "dbus": _safe(check_dbus),
+        "package_managers": _safe(check_package_managers),
+        "vpn_tooling": _safe(check_vpn_tooling),
+        "egress_easyvpn_openvpn_com": _safe(
+            check_egress, "easyvpn.openvpn.com", [443, 943, 1194]
         ),
     }
     return json.dumps(report, indent=2)
